@@ -142,9 +142,21 @@ def main(chunk_num, df_data, logger, args, title_id_dict, descript_id_dict):
             }
 
             if args.agent_type == "static":
-                rec_agent = iAgent(task_input, logger)
+                rec_agent = iAgent(
+                    task_input,
+                    logger,
+                    model_name=args.model_name,
+                    base_url=args.base_url,
+                    api_key=args.api_key,
+                )
             elif args.agent_type == "dynamic":
-                rec_agent = i2Agent(task_input, logger)
+                rec_agent = i2Agent(
+                    task_input,
+                    logger,
+                    model_name=args.model_name,
+                    base_url=args.base_url,
+                    api_key=args.api_key,
+                )
             futures.append(executor.submit(rec_agent.run))
             if i > 1:
                 break
@@ -174,6 +186,9 @@ if __name__ == "__main__":
     parser.add_argument('--dataset', type=str, default="amazon", help='type of dataset')
     parser.add_argument('--domain', type=str, default="books", help='type of dataset')
     parser.add_argument('--agent_type', type=str, default="static", help='type of runagent')
+    parser.add_argument('--model_name', type=str, default="gpt-4o-mini", help='model name for OpenAI-compatible API')
+    parser.add_argument('--base_url', type=str, default=None, help='base url for OpenAI-compatible API')
+    parser.add_argument('--api_key', type=str, default=None, help='API key (optional, fallback to env OPENAI_API_KEY/DASHSCOPE_API_KEY)')
 
     args = parser.parse_args()
 
