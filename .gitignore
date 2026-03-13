@@ -9,6 +9,8 @@ src/storage/*.json
 context_restoration/
 .pytest_cache
 .env
+data
+result
 
 # IPython
 profile_default/
