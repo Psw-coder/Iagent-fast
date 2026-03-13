@@ -25,6 +25,15 @@ from pathlib import Path
 import time
 import random
 
+def _create_openai_client(api_key=None, base_url=None):
+    resolved_api_key = api_key or os.environ.get("OPENAI_API_KEY") or os.environ.get("DASHSCOPE_API_KEY")
+    client_kwargs = {}
+    if resolved_api_key:
+        client_kwargs["api_key"] = resolved_api_key
+    if base_url:
+        client_kwargs["base_url"] = base_url
+    return OpenAI(**client_kwargs)
+
 def cal_ndcg_hr_single(answer,ranking_list,topk=10):
     """
     计算单条样本在给定 topk 下的排序指标。
@@ -59,13 +68,13 @@ class iAgent():
     阶段2：结合候选列表、知识、静态兴趣，生成 rerank_list 和解释。
     """
 
-    def __init__(self, task_input, logger):
+    def __init__(self, task_input, logger, model_name="gpt-4o-mini", base_url=None, baseurl=None, api_key=None):
         self.task_input = task_input
         self.messages = []
-        self.client = OpenAI(
-            # This is the default and can be omitted
-            api_key=os.environ.get("OPENAI_API_KEY"),
-        )
+        if base_url is None and baseurl is not None:
+            base_url = baseurl
+        self.model_name = model_name
+        self.client = _create_openai_client(api_key=api_key, base_url=base_url)
 
         self.workflow = [
             {
@@ -129,7 +138,7 @@ class iAgent():
                             try:
                                 completion = self.client.chat.completions.create(
                                                 messages=self.messages,
-                                                model= "gpt-4o-mini",
+                                                model=self.model_name,
                                                 response_format={
                                                     "type": "json_schema",
                                                     "json_schema": {
@@ -178,7 +187,7 @@ class iAgent():
                             try:
                                 completion = self.client.chat.completions.create(
                                     messages=self.messages,
-                                    model= "gpt-4o-mini",
+                                    model=self.model_name,
                                     response_format={
                                         "type": "json_schema",
                                         "json_schema": {
@@ -246,7 +255,7 @@ class iAgent():
                         try:
                             completion = self.client.chat.completions.create(
                                 messages=self.messages,
-                                model= "gpt-4o-mini",
+                                model=self.model_name,
                                 response_format={
                                     "type": "json_schema",
                                     "json_schema": {
@@ -325,12 +334,13 @@ class i2Agent():
     相比 iAgent，新增“用户画像 + 动态兴趣”阶段，使重排依据更丰富。
     """
 
-    def __init__(self,task_input,logger):
+    def __init__(self,task_input,logger, model_name="gpt-4o-mini", base_url=None, baseurl=None, api_key=None):
         self.task_input = task_input
         self.messages = []
-        self.client = OpenAI(
-            api_key=os.environ.get("OPENAI_API_KEY"),
-        )
+        if base_url is None and baseurl is not None:
+            base_url = baseurl
+        self.model_name = model_name
+        self.client = _create_openai_client(api_key=api_key, base_url=base_url)
         self.workflow = [
             {
                 "message": "Here is the background of one user. ",
@@ -412,7 +422,7 @@ class i2Agent():
                             try:
                                 completion = self.client.chat.completions.create(
                                                 messages=self.messages_initial,
-                                                model= "gpt-4o-mini",
+                                                model=self.model_name,
                                                 response_format={
                                                     "type": "json_schema",
                                                     "json_schema": {
@@ -465,7 +475,7 @@ class i2Agent():
                             try:
                                 completion = self.client.chat.completions.create(
                                                 messages=self.messages_initial,
-                                                model= "gpt-4o-mini",
+                                                model=self.model_name,
                                                 response_format={
                                                     "type": "json_schema",
                                                     "json_schema": {
@@ -513,7 +523,7 @@ class i2Agent():
                             try:
                                 completion = self.client.chat.completions.create(
                                                 messages=self.messages,
-                                                model= "gpt-4o-mini",
+                                                model=self.model_name,
                                                 response_format={
                                                     "type": "json_schema",
                                                     "json_schema": {
@@ -562,7 +572,7 @@ class i2Agent():
                             try:
                                 completion = self.client.chat.completions.create(
                                     messages=self.messages,
-                                    model= "gpt-4o-mini",
+                                    model=self.model_name,
                                     response_format={
                                         "type": "json_schema",
                                         "json_schema": {
@@ -615,7 +625,7 @@ class i2Agent():
                             try:
                                 completion = self.client.chat.completions.create(
                                     messages=self.messages,
-                                    model= "gpt-4o-mini",
+                                    model=self.model_name,
                                     response_format={
                                         "type": "json_schema",
                                         "json_schema": {
@@ -684,7 +694,7 @@ class i2Agent():
                             # 尝试发送请求
                             completion = self.client.chat.completions.create(
                                 messages=self.messages,
-                                model= "gpt-4o-mini",
+                                model=self.model_name,
                                 response_format={
                                     "type": "json_schema",
                                     "json_schema": {
