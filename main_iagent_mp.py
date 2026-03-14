@@ -158,8 +158,9 @@ def main(chunk_num, df_data, logger, args, title_id_dict, descript_id_dict):
                     api_key=args.api_key,
                 )
             futures.append(executor.submit(rec_agent.run))
-            if i > 1:
-                break
+            # #调试api
+            # if i > 1:
+            #     break
         for future in as_completed(futures):
             try:
                 result = future.result()
@@ -196,6 +197,7 @@ if __name__ == "__main__":
     df_data = pd.read_pickle("data/{}All_recagent.pkl".format(args.domain))
     logger = init_logger("result/{}_{}/".format(args.dataset,args.domain), "resultsteps_{}".format(time.strftime('%m_%d_%H_%M_%S', time.localtime()))+"_{}.log".format(args.agent_type))
     logger.info(vars(args))
+    print(f"数据总数：{len(df_data)}")
     split_size = 1000
     num_chunks = len(df_data) // split_size + (1 if len(df_data) % split_size != 0 else 0)
     df_dict = pd.read_csv("data/combined_{}_asin_mapping.csv".format(args.domain))
